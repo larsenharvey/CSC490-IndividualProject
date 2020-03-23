@@ -1,0 +1,26 @@
+#main-content{
+}
+.questions-div{
+	text-align:center;
+	margin:0 20%;
+    border-radius:10px;
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+}
+.questions-div label{
+	font-size:24px;
+}
+.questions-div label input{
+	padding:100px;
+}
+.radio-label{
+	display:inline-block;
+	vertical-align:middle;
+}
+.radio-btn, .check-btn{
+	display:inline-block;
+	vertical-align:middle;
+	margin-bottom:1%;
+	margin-right:2%;
+}
