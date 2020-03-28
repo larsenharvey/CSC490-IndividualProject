@@ -24,3 +24,12 @@
 	margin-bottom:1%;
 	margin-right:2%;
 }
+#year-div{
+	display:inline;
+}
+#driving-conditions-div, #oil-type-div{
+	display:none;
+}
+#back-btn{
+	display:none;
+}

@@ -14,39 +14,60 @@
 
 <div id="main-content">
 	<div class="questions-div">
-		<h3>What year is your vehicle?</h3>
-		<div class="radio">
-			<label class="radio-label"><input class="radio-btn" type="radio" name="optradio">2008 and newer</label>
-		</div>
-		<div class="radio">
-			<label class="radio-label"><input class="radio-btn" type="radio" name="optradio">2007 and older</label>
-		</div>
-
-		<h3>Driving Conditions</h3>
-		<div class="checkbox">
-			<label><input class="check-btn" type="checkbox" value="">Frequent off-road driving</label>
-		</div>
-		<div class="checkbox">
-			<label><input class="check-btn" type="checkbox" value="">Frequent driving in dusty conditions</label>
-		</div>
-		<div class="checkbox">
-			<label><input class="check-btn" type="checkbox" value="">Frequently towing or carrying heavy loads</label>
-		</div>
-		<div class="checkbox">
-			<label><input class="check-btn" type="checkbox" value="">Frequent excessive idling</label>
-		</div>
-		<div class="checkbox">
-			<label><input class="check-btn" type="checkbox" value="">Frequent driving at low speeds for long distance (city driving)</label>
+		<div id="year-div">
+			<h3>What year is your vehicle?</h3>
+			<div class="radio">
+				<label class="radio-label"><input class="radio-btn" type="radio" checked name="optradio">2007 and older</label>
+			</div>
+			<div class="radio">
+				<label class="radio-label"><input class="radio-btn" type="radio" name="optradio">2008 and newer</label>
+			</div>
 		</div>
 
-		<button class="btn btn-primary">Next</button>
+		<div id="driving-conditions-div">
+			<h3>Driving Conditions</h3>
+			<div class="checkbox">
+				<label><input class="check-btn top-checks" type="checkbox" onchange='cancelCheckboxes(this)' value="">Frequent off-road driving</label>
+			</div>
+			<div class="checkbox">
+				<label><input class="check-btn top-checks" type="checkbox" onchange='cancelCheckboxes(this)' value="">Frequent driving in dusty conditions</label>
+			</div>
+			<div class="checkbox">
+				<label><input class="check-btn top-checks" type="checkbox" onchange='cancelCheckboxes(this)' value="">Frequently towing or carrying heavy loads</label>
+			</div>
+			<div class="checkbox">
+				<label><input class="check-btn top-checks" type="checkbox" onchange='cancelCheckboxes(this)' value="">Frequent excessive idling</label>
+			</div>
+			<div class="checkbox">
+				<label><input class="check-btn top-checks" type="checkbox" onchange='cancelCheckboxes(this)' value="">Frequent driving at low speeds for long distance (city driving)</label>
+			</div>
+			<div class="checkbox">
+				<label><input class="check-btn" type="checkbox" onchange='cancelCheckboxes(this)' id="none-checkbox" value="">None of the above</label>
+			</div>
+		</div>
+
+		<div id="oil-type-div">
+			<h3>Oil Type</h3>
+			<div class="radio">
+				<label class="radio-label"><input class="radio-btn" type="radio" checked name="optradio">Convential Motor Oil</label>
+			</div>
+			<div class="radio">
+				<label class="radio-label"><input class="radio-btn" type="radio" name="optradio">Synthetic Motor Oil</label>
+			</div>
+			<div class="radio">
+				<label class="radio-label"><input class="radio-btn" type="radio" name="optradio">I'm not sure</label>
+			</div>
+		</div>
+
+		<button class="btn btn-primary" id="back-btn" onclick="advanceForm('back')">Back</button>
+		<button class="btn btn-primary" onclick="advanceForm('next')">Next</button>
 	</div>
 </div>
 
 </body>
 
 <!-- javascript -->
-<script type="text/javascript" src="rellax.js"></script>
+<script type="text/javascript" src="script.js"></script>
 
 <!-- bootstrap -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
