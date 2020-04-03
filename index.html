@@ -9,10 +9,8 @@
 
 <body>
 
-<h1>Car Maintenance Tracker</h1>
-<p>My first paragraph.</p>
-
 <div id="main-content">
+	<h1 id="main-title">Car Maintenance Tracker</h1>
 	<div class="questions-div">
 		<div id="progress-bar"></div>
 		<div id="year-div">
@@ -20,13 +18,13 @@
 
 			<div class="form-option">
 				<label class="container">2007 and older
-					<input type="radio" checked="checked" name="year-option" value="2007">
+					<input type="radio" checked="checked" name="year-option" value="2007" id="older-car">
 				  	<span class="checkmark"></span>
 				</label>
 			</div>
 			<div class="form-option">
 				<label class="container">2008 and newer
-					<input type="radio" name="year-option" value="2008">
+					<input type="radio" name="year-option" value="2008" id="newer-car">
 				  	<span class="checkmark"></span>
 				</label>
 			</div>
@@ -82,14 +80,14 @@
 			<h3>Oil Type</h3>
 
 			<div class="form-option">
-				<label class="container">Convential Motor Oil
-					<input type="radio" checked="checked" name="oil-option" value="convential">
+				<label class="container">Conventional Motor Oil
+					<input type="radio" checked="checked" name="oil-option" value="conventional">
 				  	<span class="checkmark"></span>
 				</label>
 			</div>
 			<div class="form-option">
 				<label class="container">Synthetic Motor Oil
-					<input type="radio" name="oil-option" value="synthetic">
+					<input type="radio" name="oil-option" value="synthetic" id="synthetic-btn">
 				  	<span class="checkmark"></span>
 				</label>
 			</div>
@@ -133,6 +131,8 @@
 			<button class="btn btn-primary" id="back-btn" onclick="advanceForm('back')">Back</button>
 			<button class="btn btn-primary" id="next-btn" onclick="advanceForm('next')">Next</button>
 		</div>
+
+		<p id="result"></p>
 	</div>
 </div>
 

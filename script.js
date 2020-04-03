@@ -51,6 +51,15 @@ function nextBtnHandler(inputType) {
 }
 
 function advanceForm(formDirection) {
+	if (nextBtn.innerHTML == "Submit") {
+		document.getElementById('buttons-div').style.display = "none";
+		lastOilChangeDiv.style.display = "none";
+
+		var nextOC = computeNextOilChange();
+		var result = document.getElementById('result');
+		result.innerHTML = nextOC;
+	}
+
 	if (formDirection == "next") {
 		if (drivingCondDiv.style.display == "inline") {   // current form section is driving cond.
 			hide1(drivingCondDiv);
@@ -110,9 +119,9 @@ function handleProgressBar(formSection) {
 	
 	// handles rounded corners of progress bar
 	if (progressBar.style.marginLeft == "0%") {
-		progressBar.style.borderTopLeftRadius = "15px";
+		progressBar.style.borderTopLeftRadius = "5px";
 	} else if (progressBar.style.marginLeft == "75%") {
-		progressBar.style.borderTopRightRadius = "15px";
+		progressBar.style.borderTopRightRadius = "5px";
 	} else {
 		progressBar.style.borderTopLeftRadius = "0px";
 		progressBar.style.borderTopRightRadius = "0px";
@@ -121,20 +130,13 @@ function handleProgressBar(formSection) {
 
 function calcLastOilChange() {
 	var lastOCText = document.getElementById('months-since-text');
-	var numMonths;
-	var month = monthDropdown.value;
-	var year = yearDropdown.value;
-	var todaysDate = new Date();
-
+	
 	// only show text if valid month/year are selected from dropdowns
 	if (monthDropdown.selectedIndex != 0 && yearDropdown.selectedIndex != 0) {
-		numMonths = todaysDate.getMonth() + 1 - getMonthFromString(month);
-
-		if (year < todaysDate.getYear() + 1900) {
-			numMonths += ((todaysDate.getYear() + 1900 - year) * 12);
-		}
 
 		lastOCText.style.display = "inline-block";
+
+		var numMonths = computeMonthsSinceLastOilChange(numMonths);
 
 		if (numMonths < 0) {
 			lastOCText.innerHTML = "Please select a valid date in the past";
@@ -157,4 +159,76 @@ function getMonthFromString(month){
       return new Date(d).getMonth() + 1;
    }
    return -1;
+ }
+
+ function computeNextOilChange() {
+ 	var oldVehicle;    // true = 2007 or earlier, false = 2008 or later
+ 	var typicalDriver; // true = typical driving (none of the above), false = any other option
+ 	var convOil; 	   // true = conventional oil or 'I'm not sure', false = synthetic oil
+ 	var monthsSinceLastOC = computeMonthsSinceLastOilChange();
+
+ 	// initialize oldVehicle var
+ 	if (document.getElementById('older-car').checked) {
+ 		oldVehicle = true;
+ 	} else if (document.getElementById('newer-car').checked) {
+ 		oldVehicle = false;
+ 	}
+
+ 	// initialize typicalDriver var
+ 	if (document.getElementById('none-checkbox').checked) {
+ 		typicalDriver = true;
+ 	} else if (!(document.getElementById('none-checkbox').checked)) {
+ 		typicalDriver = false
+ 	}
+
+ 	// initialize convOil Var
+ 	if (!(document.getElementById('synthetic-btn').checked)) {
+ 		convOil = true;
+ 	} else if (document.getElementById('synthetic-btn').checked) {
+ 		convOil = false;
+ 	}
+
+ 	if (oldVehicle) {
+ 		if (convOil) {
+ 			if (typicalDriver) {
+ 				return "You should get your oil changed every 5000 miles or every 6 months.";
+	 		} else if (!typicalDriver) {
+	 			return "You should change your oil every 3000 miles or every 3 months.";
+	 		}
+ 		} else if (!convOil) { // synthetic oil
+ 			if (typicalDriver) {
+ 				return "You should get your oil changed every 7500 miles or every 7 months.";
+	 		} else if (!typicalDriver) {
+	 			return "You should change your oil every 5000 miles or every 4 months.";
+	 		}
+ 		}
+ 	} else if (!oldVehicle) {
+ 		if (convOil) {
+	  		if (typicalDriver) {
+	 			return "You should change your oil every 7500 miles or every 6 months.";
+	 		} else if (!typicalDriver) {
+	 			return "You should change your oil every 5000 miles or every 6 months.";
+	 		}
+ 		} else if (!convOil) { // synthetic oil
+ 			if (typicalDriver) {
+	 			return "You should change your oil every 10000 miles or every 10 months.";
+	 		} else if (!typicalDriver) {
+	 			return "You should change your oil every 7500 miles or every 8 months.";
+	 		}	
+ 		}
+
+ 	}
+ }
+
+ function computeMonthsSinceLastOilChange() {
+	var month = monthDropdown.value;
+	var year = yearDropdown.value;
+	var todaysDate = new Date();
+
+	var numMonths = todaysDate.getMonth() + 1 - getMonthFromString(month);
+
+	if (year < todaysDate.getYear() + 1900) {
+			numMonths += ((todaysDate.getYear() + 1900 - year) * 12);
+	}
+	return numMonths;
  }

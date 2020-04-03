@@ -1,16 +1,25 @@
+html{
+  background-color:#e6e6e6;
+}
 #main-content{
+    background-color:#e6e6e6;
+    margin-bottom:10%;
+}
+#main-title{
+  text-align:center;
+  padding:5% 0%;
 }
 #progress-bar{
 	width:25%;
 	background-color:#007bff;
 	height:10px;
 	margin-bottom:5%;
-  border-top-left-radius: 15px;
+  border-top-left-radius: 5px;
 }
 .questions-div{
   	text-align:center;
   	margin:0 20%;
-    border-radius:15px;
+    border-radius:5px;
     background-color:#F8F8F8;
 }
 .questions-div label{
@@ -58,6 +67,7 @@
   display:none;
   margin-bottom:2%;
   margin-top:-4%;
+
 }
 
 #buttons-div{
