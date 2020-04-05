@@ -7,7 +7,7 @@
 		<link rel="stylesheet" href="bootstrap.css">
 	</head>
 
-<body>
+<body onload="clearPage('year'), nextBtnHandler()">
 
 <div id="main-content">
 	<h1 id="main-title">Car Maintenance Tracker</h1>
@@ -18,13 +18,13 @@
 
 			<div class="form-option">
 				<label class="container">2007 and older
-					<input type="radio" checked="checked" name="year-option" value="2007" id="older-car">
+					<input type="radio" class="year-check" name="year-option" value="2007" id="older-car" onchange="nextBtnHandler()">
 				  	<span class="checkmark"></span>
 				</label>
 			</div>
 			<div class="form-option">
 				<label class="container">2008 and newer
-					<input type="radio" name="year-option" value="2008" id="newer-car">
+					<input type="radio" class="year-check" name="year-option" value="2008" id="newer-car" onchange="nextBtnHandler()">
 				  	<span class="checkmark"></span>
 				</label>
 			</div>
@@ -34,43 +34,37 @@
 			<h3>Driving Conditions</h3>
 			<div class="form-option">
 				<label class="container">Frequent off-road driving
-					<input type="checkbox" checked="checked" class="check-btn top-checks" onchange="cancelCheckboxes(this), nextBtnHandler('checkbox')">
+					<input type="checkbox" checked="checked" class="cond-check top-checks" onchange="drivingCondCheckHandler(this), nextBtnHandler()">
 					<span class="checkmark no-bR"></span>
 				</label>
 			</div>
 			<div class="form-option">
 				<label class="container">Frequent driving in dusty conditions
-					<input type="checkbox" class="check-btn top-checks" onchange="cancelCheckboxes(this), nextBtnHandler('checkbox')">
-					<span class="checkmark no-bR"></span>
-				</label>
-			</div>
-			<div class="form-option">
-				<label class="container">Frequent driving in dusty conditions
-					<input type="checkbox" class="check-btn top-checks" onchange="cancelCheckboxes(this), nextBtnHandler('checkbox')">
+					<input type="checkbox" class="cond-check top-checks" onchange="drivingCondCheckHandler(this), nextBtnHandler()">
 					<span class="checkmark no-bR"></span>
 				</label>
 			</div>
 			<div class="form-option">
 				<label class="container">Frequently towing or carrying heavy loads
-					<input type="checkbox" class="check-btn top-checks" onchange="cancelCheckboxes(this), nextBtnHandler('checkbox')">
+					<input type="checkbox" class="cond-check top-checks" onchange="drivingCondCheckHandler(this), nextBtnHandler()">
 					<span class="checkmark no-bR"></span>
 				</label>
 			</div>
 			<div class="form-option">
 				<label class="container">Frequent excessive idling
-					<input type="checkbox" class="check-btn top-checks" onchange="cancelCheckboxes(this), nextBtnHandler('checkbox')">
+					<input type="checkbox" class="cond-check top-checks" onchange="drivingCondCheckHandler(this), nextBtnHandler()">
 					<span class="checkmark no-bR"></span>
 				</label>
 			</div>
 			<div class="form-option">
 				<label class="container">Frequent driving at low speeds for long distance (city driving)
-					<input type="checkbox" class="check-btn top-checks" onchange="cancelCheckboxes(this), nextBtnHandler('checkbox')">
+					<input type="checkbox" class="cond-check top-checks" onchange="drivingCondCheckHandler(this), nextBtnHandler()">
 					<span class="checkmark no-bR"></span>
 				</label>
 			</div>
 			<div class="form-option">
 				<label class="container">None of the above
-					<input type="checkbox" class="check-btn" onchange="cancelCheckboxes(this), nextBtnHandler('checkbox')" id="none-checkbox">
+					<input type="checkbox" class="cond-check" onchange="drivingCondCheckHandler(this), nextBtnHandler()" id="none-checkbox">
 					<span class="checkmark no-bR"></span>
 				</label>
 			</div>
@@ -81,19 +75,19 @@
 
 			<div class="form-option">
 				<label class="container">Conventional Motor Oil
-					<input type="radio" checked="checked" name="oil-option" value="conventional">
+					<input type="radio" class="oil-check" name="oil-option" value="conventional" onchange="nextBtnHandler()">
 				  	<span class="checkmark"></span>
 				</label>
 			</div>
 			<div class="form-option">
 				<label class="container">Synthetic Motor Oil
-					<input type="radio" name="oil-option" value="synthetic" id="synthetic-btn">
+					<input type="radio" class="oil-check" name="oil-option" value="synthetic" id="synthetic-btn" onchange="nextBtnHandler()">
 				  	<span class="checkmark"></span>
 				</label>
 			</div>
 			<div class="form-option">
 				<label class="container">I'm not sure
-					<input type="radio" name="oil-option" value="unsure">
+					<input type="radio" class="oil-check" name="oil-option" value="unsure" onchange="nextBtnHandler()">
 				  	<span class="checkmark"></span>
 				</label>
 			</div>
@@ -101,7 +95,7 @@
 
 		<div id="last-oil-change-div">
 			<h3>Last Oil Change</h3>
-			<select name="month" id="month-dropdown" onchange="nextBtnHandler('dropdown'), calcLastOilChange()">
+			<select name="month" id="month-dropdown" onchange="nextBtnHandler(), setLastOilChangeText()">
 				<option>- Month -</option>
 				<option value="January">January</option>
 				<option value="Febuary">Febuary</option>
@@ -116,7 +110,7 @@
 				<option value="November">November</option>
 				<option value="December">December</option>
 			</select>
-			<select name="year" id="year-dropdown" onchange="nextBtnHandler('dropdown'), calcLastOilChange()">
+			<select name="year" id="year-dropdown" onchange="nextBtnHandler(), setLastOilChangeText()">
 				<option>- Year -</option>
 				<option value="2020">2020</option>
 				<option value="2019">2019</option>
@@ -124,15 +118,51 @@
 			</select>
 
 			<br />
-			<h4 id="months-since-text"></h4>
+			<p id="months-since-text"></p>
 		</div>
 
 		<div id="buttons-div">
-			<button class="btn btn-primary" id="back-btn" onclick="advanceForm('back')">Back</button>
-			<button class="btn btn-primary" id="next-btn" onclick="advanceForm('next')">Next</button>
+			<button class="btn btn-primary" id="back-btn" onclick="formHandler('back')">Back</button>
+			<button class="btn btn-primary" id="next-btn" onclick="formHandler('next')">Next</button>
 		</div>
 
-		<p id="result"></p>
+		<h2 id="months-until-next-OC-text"></h2>
+		<p id="recommendation-text"></p>
+
+		<button class="btn btn-primary" id="add-oil-change">Add oil change to log</button>
+	</div>
+	<div id="oil-change-table-div">
+		<h3 id="table-title">Oil Change History</h3>
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col"></th>
+					<th scope="col">Month</th>
+					<th scope="col">Year</th>
+					<th scope="col">Oil Type</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th scope="row"></th>
+					<td>January</td>
+					<td>2020</td>
+					<td>Conventional</td>
+				</tr>
+				<tr>
+					<th scope="row"></th>
+					<td>June</td>
+					<td>2019</td>
+					<td>Synthetic</td>
+				</tr>
+				<tr>
+					<th scope="row"></th>
+					<td>December</td>
+					<td>2018</td>
+					<td>Conventional</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 </div>
 
@@ -144,5 +174,29 @@
 <!-- bootstrap -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.13.2/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/7.13.2/firebase-analytics.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyASNODffe-dM0bghv3o261qZunlEc-rc8Y",
+    authDomain: "vehicle-maintenance-trac-78e68.firebaseapp.com",
+    databaseURL: "https://vehicle-maintenance-trac-78e68.firebaseio.com",
+    projectId: "vehicle-maintenance-trac-78e68",
+    storageBucket: "vehicle-maintenance-trac-78e68.appspot.com",
+    messagingSenderId: "741286839665",
+    appId: "1:741286839665:web:dfc79d09a72f70de0b22d0",
+    measurementId: "G-4CT0R67KXD"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+</script>
 
 </html>

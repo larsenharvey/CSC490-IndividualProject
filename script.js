@@ -5,16 +5,34 @@ var lastOilChangeDiv = document.getElementById('last-oil-change-div');
 
 var backBtn = document.getElementById('back-btn');
 var nextBtn = document.getElementById('next-btn');
-var checkboxes = document.getElementsByClassName('check-btn');
+
+var yearOptions = document.getElementsByClassName('year-check');
+var drivingCondOptions = document.getElementsByClassName('cond-check');
+var oilOptions = document.getElementsByClassName('oil-check');
+
 var monthDropdown = document.getElementById('month-dropdown');
 var yearDropdown = document.getElementById('year-dropdown');
 
+var currentPage;
 var nextDisabled = true;
 
 
+// returns the current page of the form the user is on
+function findCurrentPage() {
+	if (yearDiv.style.display != "none") {
+		return "year";
+	} else if (drivingCondDiv.style.display != "none") {
+		return "driving conditions";
+	} else if (oilDiv.style.display != "none") {
+		return "oil type";
+	} else if (lastOilChangeDiv.style.display != "none") {
+		return "last oil change";
+	}
+}
+
 // Removes other checks if 'None of the above' is checked, also removes the check 
 //from 'None of the above' if another checkbox is checked
-function cancelCheckboxes(checkbox) {
+function drivingCondCheckHandler(checkbox) {
 	var topChecks = document.getElementsByClassName('top-checks');
 
 	if (checkbox.classList.contains('top-checks')) {
@@ -28,21 +46,27 @@ function cancelCheckboxes(checkbox) {
 	}
 }
 
-// Method to handle if next button should be disabled, only required for screen with checkboxes
-// since radio buttons are always set to have one option checked as a default
-function nextBtnHandler(inputType) {
+// Method to handle if next button should be disabled
+function nextBtnHandler() {
 	// Default: Disable next button if no options are checked
 	nextDisabled = true;
+	currentPage = findCurrentPage();
 
-	if (inputType == "checkbox") {
-		for (var i = 0; i < checkboxes.length; i++) {
-			if (checkboxes[i].checked) {
-				nextDisabled = false;
-			}
+	if (currentPage == "year") {
+		if (nextBtnHandlerHelper(yearOptions) == true) {
+			nextDisabled = false;
 		}
-	} else if (inputType == "dropdown") {
+	} else if (currentPage == "driving conditions") {
+		if (nextBtnHandlerHelper(drivingCondOptions) == true) {
+			nextDisabled = false;
+		}
+	} else if (currentPage == "oil type") {
+		if (nextBtnHandlerHelper(oilOptions) == true) {
+			nextDisabled = false;
+		}
+	} else if (currentPage == "last oil change") {
 		// only progress if a valid date/year are selected
-		if (monthDropdown.selectedIndex != 0 && yearDropdown.selectedIndex != 0) {
+		if ((monthDropdown.selectedIndex != 0 && yearDropdown.selectedIndex != 0) && (computeMonthsSinceLastOilChange() >= 0)) {
 			nextDisabled = false;
 		}
 	}
@@ -50,51 +74,97 @@ function nextBtnHandler(inputType) {
 	nextDisabled ? nextBtn.disabled = true : nextBtn.disabled = false;
 }
 
-function advanceForm(formDirection) {
-	if (nextBtn.innerHTML == "Submit") {
-		document.getElementById('buttons-div').style.display = "none";
-		lastOilChangeDiv.style.display = "none";
-
-		var nextOC = computeNextOilChange();
-		var result = document.getElementById('result');
-		result.innerHTML = nextOC;
+// checks if any button in a class is checked
+function nextBtnHandlerHelper(buttonClass) {
+	for (var i = 0; i < buttonClass.length; i++) {
+		if (buttonClass[i].checked) {
+			return true;
+		}
 	}
+}
+
+// This function handles which screens of the form to show at once
+function formHandler(formDirection) {
+	currentPage = findCurrentPage();
 
 	if (formDirection == "next") {
-		if (drivingCondDiv.style.display == "inline") {   // current form section is driving cond.
-			hide1(drivingCondDiv);
-			show1(oilDiv);
-			handleProgressBar(2);
-		} else if (yearDiv.style.display != "none") { 	// current form section is vehicle year
-			nextBtnHandler("checkbox");
+		if (currentPage == "year") {
+			clearPage('drivingcond'); // clear next page of inputs
 			hide1(yearDiv);
 			show2(backBtn, drivingCondDiv);
-			handleProgressBar(1);
-		} else if (oilDiv.style.display != "none") {   // current form section is oil type
-			nextBtnHandler("dropdown");
+			progressBarHandler(1);
+		} else if (currentPage == "driving conditions") {
+			clearPage('oiltype'); // clear next page of inputs
+			hide1(drivingCondDiv);
+			show1(oilDiv);
+			progressBarHandler(2);
+		} else if (currentPage == "oil type") {
+			clearPage('lastOC'); // clear next page of inputs
 			hide1(oilDiv);
 			show1(lastOilChangeDiv);
-			handleProgressBar(3);
+			progressBarHandler(3);
 			nextBtn.innerHTML = "Submit";
 		}
+
+		// Used for last page
+		if (currentPage == "last oil change") {
+			submitForm();
+		}
+
+		nextBtnHandler();
 	} else if (formDirection == "back") {
 		nextBtn.removeAttribute('disabled');
 
-		if (drivingCondDiv.style.display != "none") {   // current form section is driving cond.
+		if (currentPage == "driving conditions") {
 			hide2(backBtn, drivingCondDiv);
 			show1(yearDiv);
-			handleProgressBar(0);
-		} else if (oilDiv.style.display != "none")	{	// current form section is oil type
+			progressBarHandler(0);
+		} else if (currentPage == "oil type")	{
 			hide1(oilDiv);
 			show1(drivingCondDiv);
-			handleProgressBar(1);
-		} else if (lastOilChangeDiv.display != "none") { // current form section is last oil change
+			progressBarHandler(1);
+		} else if (currentPage == "last oil change") {
 			hide1(lastOilChangeDiv);
 			show1(oilDiv);
-			handleProgressBar(2);
+			progressBarHandler(2);
 			nextBtn.innerHTML = "Next";
 		}
 	}
+}
+
+// Calls other methods to calculate if you are overdue for an oil change, and
+// gives a recommendation for how often to get your oil changed
+function submitForm() {
+	document.getElementById('buttons-div').style.display = "none";
+	document.getElementById('add-oil-change').style.display = "inline";
+	lastOilChangeDiv.style.display = "none";
+
+	var monthsUntilNextOCText = document.getElementById('months-until-next-OC-text');
+	var recommendationText = document.getElementById('recommendation-text');
+
+	var monthsSinceLastOC = computeMonthsSinceLastOilChange();
+	var recommendedMonthsBetweenOC = getOilChangeInfoHelper()[1];
+
+	var monthsLeft = recommendedMonthsBetweenOC - monthsSinceLastOC; // number of months until left an oil change is recommended
+
+	if (monthsLeft > 1) {
+		monthsUntilNextOCText.innerHTML = "You should get your oil changed in " + monthsLeft + " months";
+		monthsUntilNextOCText.style.color = "#008000";
+	} else if (monthsLeft == 1) { // (for grammar!)
+		monthsUntilNextOCText.innerHTML = "You should get your oil changed in " + monthsLeft + " month";
+		monthsUntilNextOCText.style.color = "#b3b300";
+	} else if (monthsLeft == -1) { // (for grammar!)
+		monthsUntilNextOCText.innerHTML = "You are " + Math.abs(monthsLeft) + " month overdue for an oil change. You should get your oil changed immediately!";
+		monthsUntilNextOCText.style.color = "#cc2900";
+	} else if (monthsLeft < 0) {
+		monthsUntilNextOCText.innerHTML = "You are " + Math.abs(monthsLeft) + " months overdue for an oil change. You should get your oil changed immediately!";
+		monthsUntilNextOCText.style.color = "#cc2900";
+	} else if (monthsLeft == 0) {
+		monthsUntilNextOCText.innerHTML = "You should get your oil changed within this month";
+		monthsUntilNextOCText.style.color = "#ff9900";
+	}
+
+	recommendationText.innerHTML = getOilChangeInfo();
 }
 
 function show1(element) {
@@ -113,22 +183,43 @@ function hide2(el1, el2) {
 	el2.style.display = "none";
 }
 
-function handleProgressBar(formSection) {
+function progressBarHandler(formSection) {
 	var progressBar = document.getElementById('progress-bar');
 	progressBar.style.marginLeft = formSection * 25 + "%"; // moves the progress bar based on where user is in form
 	
 	// handles rounded corners of progress bar
 	if (progressBar.style.marginLeft == "0%") {
-		progressBar.style.borderTopLeftRadius = "5px";
+		progressBar.style.borderTopLeftRadius = "8px";
 	} else if (progressBar.style.marginLeft == "75%") {
-		progressBar.style.borderTopRightRadius = "5px";
+		progressBar.style.borderTopRightRadius = "8px";
 	} else {
 		progressBar.style.borderTopLeftRadius = "0px";
 		progressBar.style.borderTopRightRadius = "0px";
 	}
 }
 
-function calcLastOilChange() {
+// This function clears the inputs for a specific form page when called
+function clearPage(page) {
+	if (page == "year") {
+		clearPageHelper(yearOptions);
+	} else if (page == "drivingcond") {
+		clearPageHelper(drivingCondOptions);
+	} else if (page == "oiltype") {
+		clearPageHelper(oilOptions);
+	} else if (page == "lastOC") {
+		monthDropdown.selectedIndex = 0;
+		yearDropdown.selectedIndex = 0;
+	}
+}
+
+// Helps above function, clears all checkboxes on a specified page
+function clearPageHelper(checkboxes) {
+	for (var i = 0; i < checkboxes.length; i++) {
+		checkboxes[i].checked = false;
+	}
+}
+
+function setLastOilChangeText() {
 	var lastOCText = document.getElementById('months-since-text');
 	
 	// only show text if valid month/year are selected from dropdowns
@@ -136,7 +227,7 @@ function calcLastOilChange() {
 
 		lastOCText.style.display = "inline-block";
 
-		var numMonths = computeMonthsSinceLastOilChange(numMonths);
+		var numMonths = computeMonthsSinceLastOilChange();
 
 		if (numMonths < 0) {
 			lastOCText.innerHTML = "Please select a valid date in the past";
@@ -151,21 +242,22 @@ function calcLastOilChange() {
 	}
 }
 
-// from https://stackoverflow.com/questions/13566552/easiest-way-to-convert-month-name-to-month-number-in-js-jan-01
-function getMonthFromString(month){
+function getOilChangeInfo() {
+	recommendation = getOilChangeInfoHelper();
 
-   var d = Date.parse(month + "1, 2012");
-   if(!isNaN(d)){
-      return new Date(d).getMonth() + 1;
-   }
-   return -1;
- }
+	recNumMiles = recommendation[0]; // numMiles rec
+	recNumMonths = recommendation[1]; // numMonths rec
+	return "For your vehicle, your oil should be changed every " + recNumMiles + " miles or every " + recNumMonths + " months (whichever comes first)";
+}
 
- function computeNextOilChange() {
+function getOilChangeInfoHelper() {
  	var oldVehicle;    // true = 2007 or earlier, false = 2008 or later
  	var typicalDriver; // true = typical driving (none of the above), false = any other option
  	var convOil; 	   // true = conventional oil or 'I'm not sure', false = synthetic oil
  	var monthsSinceLastOC = computeMonthsSinceLastOilChange();
+
+ 	// array that will be returned, result[0] = recommended number of miles, result[1] = recommended number of months
+ 	var recommendation;
 
  	// initialize oldVehicle var
  	if (document.getElementById('older-car').checked) {
@@ -181,7 +273,7 @@ function getMonthFromString(month){
  		typicalDriver = false
  	}
 
- 	// initialize convOil Var
+ 	// initialize convOil var
  	if (!(document.getElementById('synthetic-btn').checked)) {
  		convOil = true;
  	} else if (document.getElementById('synthetic-btn').checked) {
@@ -191,36 +283,37 @@ function getMonthFromString(month){
  	if (oldVehicle) {
  		if (convOil) {
  			if (typicalDriver) {
- 				return "You should get your oil changed every 5000 miles or every 6 months.";
+ 				recommendation = [5000, 6];
 	 		} else if (!typicalDriver) {
-	 			return "You should change your oil every 3000 miles or every 3 months.";
+	 			recommendation = [3000, 3];
 	 		}
  		} else if (!convOil) { // synthetic oil
  			if (typicalDriver) {
- 				return "You should get your oil changed every 7500 miles or every 7 months.";
+ 				recommendation = [7500, 7];
 	 		} else if (!typicalDriver) {
-	 			return "You should change your oil every 5000 miles or every 4 months.";
+	 			recommendation = [5000, 4]
 	 		}
  		}
  	} else if (!oldVehicle) {
  		if (convOil) {
 	  		if (typicalDriver) {
-	 			return "You should change your oil every 7500 miles or every 6 months.";
+	  			recommendation = [7500, 6];
 	 		} else if (!typicalDriver) {
-	 			return "You should change your oil every 5000 miles or every 6 months.";
+	 			recommendation = [5000, 6];
 	 		}
  		} else if (!convOil) { // synthetic oil
  			if (typicalDriver) {
-	 			return "You should change your oil every 10000 miles or every 10 months.";
+ 				recommendation = [10000, 10];
 	 		} else if (!typicalDriver) {
-	 			return "You should change your oil every 7500 miles or every 8 months.";
+	 			recommendation = [7500, 8];
 	 		}	
  		}
-
  	}
- }
 
- function computeMonthsSinceLastOilChange() {
+ 	return recommendation;
+}
+
+function computeMonthsSinceLastOilChange() {
 	var month = monthDropdown.value;
 	var year = yearDropdown.value;
 	var todaysDate = new Date();
@@ -231,4 +324,14 @@ function getMonthFromString(month){
 			numMonths += ((todaysDate.getYear() + 1900 - year) * 12);
 	}
 	return numMonths;
+}
+
+// from https://stackoverflow.com/questions/13566552/easiest-way-to-convert-month-name-to-month-number-in-js-jan-01
+function getMonthFromString(month){
+
+   var d = Date.parse(month + "1, 2012");
+   if(!isNaN(d)){
+      return new Date(d).getMonth() + 1;
+   }
+   return -1;
  }

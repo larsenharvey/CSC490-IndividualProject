@@ -14,13 +14,13 @@ html{
 	background-color:#007bff;
 	height:10px;
 	margin-bottom:5%;
-  border-top-left-radius: 5px;
+  border-top-left-radius: 8px;
 }
 .questions-div{
   	text-align:center;
   	margin:0 20%;
-    border-radius:5px;
-    background-color:#F8F8F8;
+    border-radius:8px;
+    background-color:#f8f8f8;
 }
 .questions-div label{
 	font-size:24px;
@@ -62,17 +62,41 @@ html{
 }
 
 #months-since-text{
-  font-weight:500;
   font-size:20px;
   display:none;
   margin-bottom:2%;
   margin-top:-4%;
-
 }
 
 #buttons-div{
-  padding-bottom:2%;
-  padding-top:1%;
+  padding-bottom:4%;
+  padding-top:2%;
+}
+
+#months-until-next-OC-text{
+  margin:5%;
+}
+
+#recommendation-text{
+  margin:5% 15%;
+  font-size:20px;
+}
+
+#add-oil-change{
+  margin-top:2%;
+  margin-bottom:4%;
+  display:none;
+}
+
+#oil-change-table-div{
+    margin:0 15%;
+    background-color:#f8f8f8;
+    border-radius:8px;
+}
+
+#table-title{
+  padding:1% 0% 0% 3%;
+  
 }
 
 
@@ -120,6 +144,7 @@ html{
 /* On mouse-over, add a grey background color */
 .container:hover input ~ .checkmark {
   background-color: #ccc;
+  transition: 0.3s ease-in-out;
 }
 
 /* When the radio button is checked, add a blue background */
