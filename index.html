@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<link href="style.css" type="text/css" rel="stylesheet" />
-		<title>Car Maintence Tracker</title>
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.10.0/firebase-app.js"></script>
 
-		<link rel="stylesheet" href="bootstrap.css">
-	</head>
+<script src="https://www.gstatic.com/firebasejs/7.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.10.0/firebase-database.js"></script>
 
-<body onload="clearPage('year'), nextBtnHandler()">
+<head>
+	<link href="style.css" type="text/css" rel="stylesheet" />
+	<title>Car Maintence Tracker</title>
+
+	<link rel="stylesheet" href="bootstrap.css">
+</head>
+
+<body onload="clearPage('year'), nextBtnHandler(), initializeTable()">
 
 <div id="main-content">
 	<h1 id="main-title">Car Maintenance Tracker</h1>
@@ -129,11 +135,11 @@
 		<h2 id="months-until-next-OC-text"></h2>
 		<p id="recommendation-text"></p>
 
-		<button class="btn btn-primary" id="add-oil-change">Add oil change to log</button>
+		<button class="btn btn-primary" id="add-oil-change" onclick="writeToFirebase()">Add oil change to log</button>
 	</div>
 	<div id="oil-change-table-div">
 		<h3 id="table-title">Oil Change History</h3>
-		<table class="table">
+		<table class="table" id="vehicle-history-table">
 			<thead>
 				<tr>
 					<th scope="col"></th>
@@ -143,29 +149,21 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr>
-					<th scope="row"></th>
-					<td>January</td>
-					<td>2020</td>
-					<td>Conventional</td>
-				</tr>
-				<tr>
-					<th scope="row"></th>
-					<td>June</td>
-					<td>2019</td>
-					<td>Synthetic</td>
-				</tr>
-				<tr>
-					<th scope="row"></th>
-					<td>December</td>
-					<td>2018</td>
-					<td>Conventional</td>
-				</tr>
 			</tbody>
 		</table>
 	</div>
 </div>
 
+<!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
+<script src="/__/firebase/7.10.0/firebase-analytics.js"></script>
+
+<!-- Add Firebase products that you want to use -->
+<script src="/__/firebase/7.10.0/firebase-auth.js"></script>
+<script src="/__/firebase/7.10.0/firebase-firestore.js"></script>
+
+
+<!-- Initialize Firebase -->
+<script src="/__/firebase/init.js"></script>
 </body>
 
 <!-- javascript -->
@@ -174,29 +172,5 @@
 <!-- bootstrap -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
-<!-- The core Firebase JS SDK is always required and must be listed first -->
-<script src="https://www.gstatic.com/firebasejs/7.13.2/firebase-app.js"></script>
-
-<!-- TODO: Add SDKs for Firebase products that you want to use
-     https://firebase.google.com/docs/web/setup#available-libraries -->
-<script src="https://www.gstatic.com/firebasejs/7.13.2/firebase-analytics.js"></script>
-
-<script>
-  // Your web app's Firebase configuration
-  var firebaseConfig = {
-    apiKey: "AIzaSyASNODffe-dM0bghv3o261qZunlEc-rc8Y",
-    authDomain: "vehicle-maintenance-trac-78e68.firebaseapp.com",
-    databaseURL: "https://vehicle-maintenance-trac-78e68.firebaseio.com",
-    projectId: "vehicle-maintenance-trac-78e68",
-    storageBucket: "vehicle-maintenance-trac-78e68.appspot.com",
-    messagingSenderId: "741286839665",
-    appId: "1:741286839665:web:dfc79d09a72f70de0b22d0",
-    measurementId: "G-4CT0R67KXD"
-  };
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  firebase.analytics();
-</script>
 
 </html>

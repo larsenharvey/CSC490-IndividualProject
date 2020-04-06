@@ -259,26 +259,10 @@ function getOilChangeInfoHelper() {
  	// array that will be returned, result[0] = recommended number of miles, result[1] = recommended number of months
  	var recommendation;
 
- 	// initialize oldVehicle var
- 	if (document.getElementById('older-car').checked) {
- 		oldVehicle = true;
- 	} else if (document.getElementById('newer-car').checked) {
- 		oldVehicle = false;
- 	}
-
- 	// initialize typicalDriver var
- 	if (document.getElementById('none-checkbox').checked) {
- 		typicalDriver = true;
- 	} else if (!(document.getElementById('none-checkbox').checked)) {
- 		typicalDriver = false
- 	}
-
- 	// initialize convOil var
- 	if (!(document.getElementById('synthetic-btn').checked)) {
- 		convOil = true;
- 	} else if (document.getElementById('synthetic-btn').checked) {
- 		convOil = false;
- 	}
+ 	// initialize variables using helper methods
+ 	oldVehicle = getVehicleYear();
+ 	typicalDriver = getDrivingConditions();
+ 	convOil = getOilType();
 
  	if (oldVehicle) {
  		if (convOil) {
@@ -326,6 +310,33 @@ function computeMonthsSinceLastOilChange() {
 	return numMonths;
 }
 
+// returns true if '2007 or older' is checked and returns false if '2008 and newer' is checked
+function getVehicleYear() {
+	if (document.getElementById('older-car').checked) {
+ 		return true;
+ 	} else if (document.getElementById('newer-car').checked) {
+ 		return false;
+ 	}
+}
+
+// returns true if typical driver ('none of the above' is checked) and false if not typical driver
+function getDrivingConditions() {
+	if (document.getElementById('none-checkbox').checked) {
+ 		return true;
+ 	} else if (!(document.getElementById('none-checkbox').checked)) {
+ 		return false;
+ 	}
+}
+
+// returns true if conventional oil is checked (or 'I'm not sure') and false if synthetic is checked
+function getOilType() {
+	if (!(document.getElementById('synthetic-btn').checked)) {
+ 		return true;
+ 	} else if (document.getElementById('synthetic-btn').checked) {
+ 		return false;
+ 	}
+}
+
 // from https://stackoverflow.com/questions/13566552/easiest-way-to-convert-month-name-to-month-number-in-js-jan-01
 function getMonthFromString(month){
 
@@ -334,4 +345,76 @@ function getMonthFromString(month){
       return new Date(d).getMonth() + 1;
    }
    return -1;
- }
+}
+
+// fills oil change history table with values from firebase
+function initializeTable() {
+	firebase.database().ref('oilChangeEntries/').once('value').then(function(snapshot) {
+		var entries = snapshot.val();
+
+		for (var key in entries) {
+		    console.log(key);
+		    addToTable(key);
+		}
+	});
+}
+
+function getTableLength() {
+	return document.getElementById("vehicle-history-table").rows.length;
+}
+
+// adds a row to the table from a specificed entry in firebase
+function addToTable(entryNum) {
+	firebase.database().ref('oilChangeEntries/' + entryNum).on('value', function(snapshot) {
+		var oilType = snapshot.val().conventionalOil;
+		if (oilType == true) {
+			oilType = "Conventional";
+		} else if (oilType == false) {
+			oilType = "Synthetic";
+		}
+		insertRow(snapshot.val().month, snapshot.val().year, oilType);
+	});
+}
+
+// from https://www.w3resource.com/javascript-exercises/javascript-dom-exercise-5.php
+function insertRow(month, year, oilType) {
+	var table=document.getElementById('vehicle-history-table').insertRow(1);
+	table.insertCell(0); // placeholder for left col
+	var x = table.insertCell(1);
+	var y = table.insertCell(2);
+	var z = table.insertCell(3);
+	x.innerHTML = month;
+	y.innerHTML = year;
+	z.innerHTML = oilType;
+}
+
+// Set the configuration for your app
+// TODO: Replace with your project's config object
+var config = {
+	apiKey: "AIzaSyASNODffe-dM0bghv3o261qZunlEc-rc8Y",
+	authDomain: "vehicle-maintenance-trac-78e68.firebaseapp.com",
+	databaseURL: "https://vehicle-maintenance-trac-78e68.firebaseio.com",
+	storageBucket: "vehicle-maintenance-trac-78e68.appspot.com"
+};
+firebase.initializeApp(config);
+// Get a reference to the database service
+var database = firebase.database();
+// Get a reference to the database service
+var rootRef = firebase.database().ref().child('infos');
+
+
+function writeToFirebase(entryNum, month, year, oilType, typicalDriver, oldVehicle) {
+	var nextEntryId = getTableLength() + 1;
+
+	firebase.database().ref('oilChangeEntries/' + "entry" + nextEntryId).set({
+		month: monthDropdown.value,
+		year: yearDropdown.value,
+		conventionalOil: getOilType(),
+		typicalDriver: getDrivingConditions(),
+		oldVehicle: getVehicleYear()
+		});
+	console.log("Saving as entry" + nextEntryId);
+
+	addToTable("entry" + nextEntryId);
+}
+
