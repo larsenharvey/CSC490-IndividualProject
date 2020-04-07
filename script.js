@@ -170,23 +170,26 @@ function submitForm(useLastEntry) {
 
 	recommendationText.innerHTML = getOilChangeInfo(useLastEntry);
 }
-
+//shows one element
 function show1(element) {
 	element.style.display = "inline";
 }
+//show two elements
 function show2(el1, el2) {
 	el1.style.display = "inline";
 	el2.style.display = "inline";
 }
-
+//hides one element
 function hide1(element) {
 	element.style.display = "none";
 }
+//hides two elements
 function hide2(el1, el2) {
 	el1.style.display = "none";
 	el2.style.display = "none";
 }
 
+// moves the progress bar across the screen depending on the current form section
 function progressBarHandler(formSection) {
 	var progressBar = document.getElementById('progress-bar');
 	progressBar.style.marginLeft = formSection * 25 + "%"; // moves the progress bar based on where user is in form
@@ -223,6 +226,7 @@ function clearPageHelper(checkboxes) {
 	}
 }
 
+// handles logic for label text that computes months since the last oil change in the form
 function setLastOilChangeText() {
 	var lastOCText = document.getElementById('months-since-text');
 	
@@ -246,6 +250,7 @@ function setLastOilChangeText() {
 	}
 }
 
+// returns a string of a recommendation for how often to change oil based on the data the users enters
 function getOilChangeInfo(useLastEntry) {
 	if (useLastEntry) {
 		recommendation = getOilChangeInfoHelper(true);
@@ -258,6 +263,8 @@ function getOilChangeInfo(useLastEntry) {
 	return "For your vehicle, your oil should be changed every " + recNumMiles + " miles or every " + recNumMonths + " months (whichever comes first)";
 }
 
+// helper function, returns a recommendation of miles & months between oil changes based
+// on the info entered by the user
 function getOilChangeInfoHelper(useLastEntry) {
  	var oldVehicle;    // true = 2007 or earlier, false = 2008 or later
  	var typicalDriver; // true = typical driving (none of the above), false = any other option
@@ -315,6 +322,7 @@ function getOilChangeInfoHelper(useLastEntry) {
  	return recommendation;
 }
 
+// returns the number of months since the last oil change, based on users' entry
 function computeMonthsSinceLastOilChange(useLastEntry) {
 	var month;
 	var year;
@@ -392,15 +400,15 @@ function initializeTable() {
 		    addToTable(key);
 		}
 	});
-
-	// sortTable();
 }
 
+// uses the last entry to predict an oil change
 function useLastEntry() {
 	submitForm(true);
 	hide2(yearDiv, document.getElementById('add-oil-change'));
 }
 
+// returns the length of the oil change history table
 function getTableLength() {
 	return oilChangeTable.rows.length;
 }
@@ -432,6 +440,7 @@ var database = firebase.database();
 var rootRef = firebase.database().ref().child('infos');
 
 
+// saves a form entry to the firebase database
 function writeToFirebase(entryNum, month, year, oilType, typicalDriver, oldVehicle) {
 	var nextEntryId = getTableLength();
 

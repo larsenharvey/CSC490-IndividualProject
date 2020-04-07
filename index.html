@@ -127,6 +127,7 @@
 			<p id="months-since-text"></p>
 		</div>
 
+		<!-- form buttons -->
 		<div id="buttons-div">
 			<button class="btn btn-primary" id="last-entry-btn" onclick="useLastEntry()">Use last entry</button>
 			<button class="btn btn-primary" id="back-btn" onclick="formHandler('back')">Back</button>
@@ -139,6 +140,8 @@
 
 		<button class="btn btn-primary" id="add-oil-change" onclick="writeToFirebase()">Add oil change to log</button>
 	</div>
+
+	<!-- table to show oil change entries -->
 	<div id="oil-change-table-div">
 		<h3 id="table-title">Oil Change History</h3>
 		<table class="table" id="vehicle-history-table">
