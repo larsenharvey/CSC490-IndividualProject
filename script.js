@@ -16,6 +16,8 @@ var yearDropdown = document.getElementById('year-dropdown');
 var currentPage;
 var nextDisabled = true;
 
+var oilChangeTable = document.getElementById('vehicle-history-table');
+
 
 // returns the current page of the form the user is on
 function findCurrentPage() {
@@ -66,7 +68,7 @@ function nextBtnHandler() {
 		}
 	} else if (currentPage == "last oil change") {
 		// only progress if a valid date/year are selected
-		if ((monthDropdown.selectedIndex != 0 && yearDropdown.selectedIndex != 0) && (computeMonthsSinceLastOilChange() >= 0)) {
+		if ((monthDropdown.selectedIndex != 0 && yearDropdown.selectedIndex != 0) && (computeMonthsSinceLastOilChange(false) >= 0)) {
 			nextDisabled = false;
 		}
 	}
@@ -90,6 +92,7 @@ function formHandler(formDirection) {
 	if (formDirection == "next") {
 		if (currentPage == "year") {
 			clearPage('drivingcond'); // clear next page of inputs
+			hide1(document.getElementById('last-entry-btn'));
 			hide1(yearDiv);
 			show2(backBtn, drivingCondDiv);
 			progressBarHandler(1);
@@ -108,7 +111,7 @@ function formHandler(formDirection) {
 
 		// Used for last page
 		if (currentPage == "last oil change") {
-			submitForm();
+			submitForm(false);
 		}
 
 		nextBtnHandler();
@@ -118,6 +121,7 @@ function formHandler(formDirection) {
 		if (currentPage == "driving conditions") {
 			hide2(backBtn, drivingCondDiv);
 			show1(yearDiv);
+			show1(document.getElementById('last-entry-btn'));
 			progressBarHandler(0);
 		} else if (currentPage == "oil type")	{
 			hide1(oilDiv);
@@ -134,7 +138,7 @@ function formHandler(formDirection) {
 
 // Calls other methods to calculate if you are overdue for an oil change, and
 // gives a recommendation for how often to get your oil changed
-function submitForm() {
+function submitForm(useLastEntry) {
 	document.getElementById('buttons-div').style.display = "none";
 	document.getElementById('add-oil-change').style.display = "inline";
 	lastOilChangeDiv.style.display = "none";
@@ -142,8 +146,8 @@ function submitForm() {
 	var monthsUntilNextOCText = document.getElementById('months-until-next-OC-text');
 	var recommendationText = document.getElementById('recommendation-text');
 
-	var monthsSinceLastOC = computeMonthsSinceLastOilChange();
-	var recommendedMonthsBetweenOC = getOilChangeInfoHelper()[1];
+	var monthsSinceLastOC = computeMonthsSinceLastOilChange(useLastEntry);
+	var recommendedMonthsBetweenOC = getOilChangeInfoHelper(useLastEntry)[1];
 
 	var monthsLeft = recommendedMonthsBetweenOC - monthsSinceLastOC; // number of months until left an oil change is recommended
 
@@ -164,7 +168,7 @@ function submitForm() {
 		monthsUntilNextOCText.style.color = "#ff9900";
 	}
 
-	recommendationText.innerHTML = getOilChangeInfo();
+	recommendationText.innerHTML = getOilChangeInfo(useLastEntry);
 }
 
 function show1(element) {
@@ -227,7 +231,7 @@ function setLastOilChangeText() {
 
 		lastOCText.style.display = "inline-block";
 
-		var numMonths = computeMonthsSinceLastOilChange();
+		var numMonths = computeMonthsSinceLastOilChange(false);
 
 		if (numMonths < 0) {
 			lastOCText.innerHTML = "Please select a valid date in the past";
@@ -242,54 +246,68 @@ function setLastOilChangeText() {
 	}
 }
 
-function getOilChangeInfo() {
-	recommendation = getOilChangeInfoHelper();
+function getOilChangeInfo(useLastEntry) {
+	if (useLastEntry) {
+		recommendation = getOilChangeInfoHelper(true);
+	} else {
+		recommendation = getOilChangeInfoHelper(false);
+	}
 
 	recNumMiles = recommendation[0]; // numMiles rec
 	recNumMonths = recommendation[1]; // numMonths rec
 	return "For your vehicle, your oil should be changed every " + recNumMiles + " miles or every " + recNumMonths + " months (whichever comes first)";
 }
 
-function getOilChangeInfoHelper() {
+function getOilChangeInfoHelper(useLastEntry) {
  	var oldVehicle;    // true = 2007 or earlier, false = 2008 or later
  	var typicalDriver; // true = typical driving (none of the above), false = any other option
  	var convOil; 	   // true = conventional oil or 'I'm not sure', false = synthetic oil
- 	var monthsSinceLastOC = computeMonthsSinceLastOilChange();
+ 	var monthsSinceLastOC = computeMonthsSinceLastOilChange(useLastEntry);
 
  	// array that will be returned, result[0] = recommended number of miles, result[1] = recommended number of months
  	var recommendation;
 
- 	// initialize variables using helper methods
- 	oldVehicle = getVehicleYear();
- 	typicalDriver = getDrivingConditions();
- 	convOil = getOilType();
+ 	if (useLastEntry) {
+ 		firebase.database().ref('oilChangeEntries/entry' + (getTableLength() - 1)).on("value", function(snapshot) {
+			var entry = snapshot.val();
+			oldVehicle = entry.oldVehicle;
+			typicalDriver = entry.typicalDriver;
+			convOil = entry.conventionalOil;
+		});
+ 	} else {
+ 		 // initialize variables using helper methods
+ 		oldVehicle = getVehicleYear();
+ 		typicalDriver = getDrivingConditions();
+ 		convOil = getOilType();
+ 	}
+
 
  	if (oldVehicle) {
  		if (convOil) {
  			if (typicalDriver) {
- 				recommendation = [5000, 6];
+ 				recommendation = ["5,000", 6];
 	 		} else if (!typicalDriver) {
-	 			recommendation = [3000, 3];
+	 			recommendation = ["3,000", 3];
 	 		}
  		} else if (!convOil) { // synthetic oil
  			if (typicalDriver) {
- 				recommendation = [7500, 7];
+ 				recommendation = ["7,500", 7];
 	 		} else if (!typicalDriver) {
-	 			recommendation = [5000, 4]
+	 			recommendation = ["5,000", 4]
 	 		}
  		}
  	} else if (!oldVehicle) {
  		if (convOil) {
 	  		if (typicalDriver) {
-	  			recommendation = [7500, 6];
+	  			recommendation = ["7,500", 6];
 	 		} else if (!typicalDriver) {
-	 			recommendation = [5000, 6];
+	 			recommendation = ["5,000", 6];
 	 		}
  		} else if (!convOil) { // synthetic oil
  			if (typicalDriver) {
- 				recommendation = [10000, 10];
+ 				recommendation = ["10,000", 10];
 	 		} else if (!typicalDriver) {
-	 			recommendation = [7500, 8];
+	 			recommendation = ["7,500", 8];
 	 		}	
  		}
  	}
@@ -297,9 +315,19 @@ function getOilChangeInfoHelper() {
  	return recommendation;
 }
 
-function computeMonthsSinceLastOilChange() {
-	var month = monthDropdown.value;
-	var year = yearDropdown.value;
+function computeMonthsSinceLastOilChange(useLastEntry) {
+	var month;
+	var year;
+	if (useLastEntry) {
+		firebase.database().ref('oilChangeEntries/entry' + (getTableLength() - 1)).on("value", function(snapshot) {
+			var entry = snapshot.val();
+			month = entry.month;
+			year = entry.year;
+		});
+	} else {
+		month = monthDropdown.value;
+		year = yearDropdown.value;
+	}
 	var todaysDate = new Date();
 
 	var numMonths = todaysDate.getMonth() + 1 - getMonthFromString(month);
@@ -347,6 +375,13 @@ function getMonthFromString(month){
    return -1;
 }
 
+
+// this function is a work in progress, currently does not act as intended!
+function sortTable() {   
+	firebase.database().ref('oilChangeEntries').orderByChild('month');
+	// console.log(firebase.database().ref('oilChangeEntries').orderByChild('month'));
+}
+
 // fills oil change history table with values from firebase
 function initializeTable() {
 	firebase.database().ref('oilChangeEntries/').once('value').then(function(snapshot) {
@@ -357,23 +392,17 @@ function initializeTable() {
 		    addToTable(key);
 		}
 	});
+
+	// sortTable();
+}
+
+function useLastEntry() {
+	submitForm(true);
+	hide2(yearDiv, document.getElementById('add-oil-change'));
 }
 
 function getTableLength() {
-	return document.getElementById("vehicle-history-table").rows.length;
-}
-
-// adds a row to the table from a specificed entry in firebase
-function addToTable(entryNum) {
-	firebase.database().ref('oilChangeEntries/' + entryNum).on('value', function(snapshot) {
-		var oilType = snapshot.val().conventionalOil;
-		if (oilType == true) {
-			oilType = "Conventional";
-		} else if (oilType == false) {
-			oilType = "Synthetic";
-		}
-		insertRow(snapshot.val().month, snapshot.val().year, oilType);
-	});
+	return oilChangeTable.rows.length;
 }
 
 // from https://www.w3resource.com/javascript-exercises/javascript-dom-exercise-5.php
@@ -404,7 +433,7 @@ var rootRef = firebase.database().ref().child('infos');
 
 
 function writeToFirebase(entryNum, month, year, oilType, typicalDriver, oldVehicle) {
-	var nextEntryId = getTableLength() + 1;
+	var nextEntryId = getTableLength();
 
 	firebase.database().ref('oilChangeEntries/' + "entry" + nextEntryId).set({
 		month: monthDropdown.value,
@@ -416,5 +445,37 @@ function writeToFirebase(entryNum, month, year, oilType, typicalDriver, oldVehic
 	console.log("Saving as entry" + nextEntryId);
 
 	addToTable("entry" + nextEntryId);
+	document.getElementById('add-oil-change').style.display = "none";
+	document.getElementById('rec-padding').style.display = "inline";
+}
+
+// adds a row to the table from a specificed entry in firebase
+function addToTable(entryNum) {
+	firebase.database().ref('oilChangeEntries/' + entryNum).on('value', function(snapshot) {
+		var oilType = snapshot.val().conventionalOil;
+		if (oilType == true) {
+			oilType = "Conventional";
+		} else if (oilType == false) {
+			oilType = "Synthetic";
+		}
+		insertRow(snapshot.val().month, snapshot.val().year, oilType);
+	});
+}
+
+// clears all entries in the table and 'clears' all entires in firebase
+function clearTable() {
+	if (confirm("Are you sure you want to clear the table? This action cannot be reversed.")) {
+		// Remove node from firebase
+		firebase.database().ref('oilChangeEntries/').remove();
+
+		// Delete entries from table - from https://stackoverflow.com/questions/7271490/delete-all-rows-in-an-html-table
+		var tableHeaderRowCount = 1;
+		var rowCount = oilChangeTable.rows.length;
+		for (var i = tableHeaderRowCount; i < rowCount; i++) {
+	    	oilChangeTable.deleteRow(tableHeaderRowCount);
+		}
+	}
+
+	hide1(document.getElementById('last-entry-btn'));
 }
 

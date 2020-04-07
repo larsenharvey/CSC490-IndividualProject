@@ -128,12 +128,14 @@
 		</div>
 
 		<div id="buttons-div">
+			<button class="btn btn-primary" id="last-entry-btn" onclick="useLastEntry()">Use last entry</button>
 			<button class="btn btn-primary" id="back-btn" onclick="formHandler('back')">Back</button>
 			<button class="btn btn-primary" id="next-btn" onclick="formHandler('next')">Next</button>
 		</div>
 
 		<h2 id="months-until-next-OC-text"></h2>
 		<p id="recommendation-text"></p>
+		<br id="rec-padding"/>
 
 		<button class="btn btn-primary" id="add-oil-change" onclick="writeToFirebase()">Add oil change to log</button>
 	</div>
@@ -151,6 +153,7 @@
 			<tbody>
 			</tbody>
 		</table>
+		<button style="margin-left:80%; margin-bottom:2%" class="btn btn-primary" onclick="clearTable()">Clear table</button>
 	</div>
 </div>
 
